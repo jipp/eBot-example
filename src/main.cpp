@@ -7,10 +7,10 @@
 
 EBot eBot = EBot();
 unsigned long distance = 0;
-int angle = 0;
 int angleStart = 30;
 int angleStop = 180 - angleStart;
 int angleDelta = 30;
+int angle = angleStart;
 unsigned long min = DISTANCE;
 unsigned long minM = DISTANCE;
 enum direction { STOP, FORWARD, BACKWARD, TURNLEFT, TURNRIGHT, ROTATELEFT, ROTATERIGHT };
