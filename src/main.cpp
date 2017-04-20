@@ -1,3 +1,5 @@
+//#define IRREMOTE
+
 #include "Arduino.h"
 #include <EBot.h>
 #include <Streaming.h>
@@ -16,7 +18,7 @@ unsigned long minM = DISTANCE;
 enum direction { STOP, FORWARD, BACKWARD, TURNLEFT, TURNRIGHT, ROTATELEFT, ROTATERIGHT };
 direction move = STOP;
 
-void drive(direction move) {
+void drive() {
   switch (move) {
     case STOP:
     Serial << "STOP" << endl;
@@ -49,14 +51,47 @@ void drive(direction move) {
   }
 }
 
+void checkRemoteCommands() {
+  char getstr;
+
+  getstr=Serial.read();
+  switch (getstr) {
+    case 's':
+    move = STOP;
+    break;
+    case 'f':
+    move = FORWARD;
+    break;
+    case 'b':
+    move = BACKWARD;
+    break;
+    case 'l':
+    move = TURNLEFT;
+    break;
+    case 'r':
+    move = TURNRIGHT;
+    break;
+    case 'L':
+    move = ROTATELEFT;
+    break;
+    case 'R':
+    move = ROTATERIGHT;
+    break;
+  }
+}
+
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   eBot.begin();
+  eBot.stop();
 }
 
 void loop() {
-  //eBot.write(angle);
-  //delay(10);
+  checkRemoteCommands();
+  drive();
+  eBot.setSpeed(10);
+  eBot.setDirection(EBot::FORWARD);
+/*  eBot.write(90);
   distance = eBot.distance();
 
   if (distance < minM && angle == 90) {
@@ -81,11 +116,12 @@ void loop() {
   Serial << "angle=" << angle << " min=" << min << " distance=" << distance << endl;
   angle += angleDelta;
   if (angle > angleStop || angle < angleStart) {
-    drive(move);
+    drive();
     angleDelta = -angleDelta;
     angle += angleDelta;
     min = DISTANCE;
     minM = DISTANCE;
   }
   delay(1000);
+  Serial << eBot.result(); */
 }
