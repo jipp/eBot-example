@@ -5,50 +5,17 @@
 #include <Streaming.h>
 
 #define DISTANCE  40
-#define SPEED 120
 
 EBot eBot = EBot();
 unsigned long distance = 0;
-int angleStart = 30;
-int angleStop = 180 - angleStart;
-int angleDelta = 30;
-int angle = angleStart;
-unsigned long min = DISTANCE;
-unsigned long minM = DISTANCE;
-enum direction { STOP, FORWARD, BACKWARD, TURNLEFT, TURNRIGHT, ROTATELEFT, ROTATERIGHT };
-direction move = STOP;
+bool manualMode = true;
+int speed = 120;
 
-void drive() {
-  switch (move) {
-    case STOP:
-    Serial << "STOP" << endl;
-    eBot.stop();
-    break;
-    case FORWARD:
-    Serial << "FORWARD" << endl;
-    eBot.forward(SPEED);
-    break;
-    case BACKWARD:
-    Serial << "BACKWARD" << endl;
-    eBot.backward(SPEED);
-    break;
-    case TURNLEFT:
-    Serial << "TURNLEFT" << endl;
-    eBot.turnLeft(SPEED);
-    break;
-    case TURNRIGHT:
-    Serial << "TURNRIGHT" << endl;
-    eBot.turnRight(SPEED);
-    break;
-    case ROTATELEFT:
-    Serial << "ROTATELEFT" << endl;
-    eBot.rotateLeft(SPEED);
-    break;
-    case ROTATERIGHT:
-    Serial << "ROTATERIGHT" << endl;
-    eBot.rotateRight(SPEED);
-    break;
+bool checkDistance() {
+  if (eBot.getDistance() < DISTANCE) {
+    return false;
   }
+  return true;
 }
 
 void checkRemoteCommands() {
@@ -57,71 +24,44 @@ void checkRemoteCommands() {
   getstr=Serial.read();
   switch (getstr) {
     case 's':
-    move = STOP;
+    if (manualMode) eBot.setDirection();
     break;
     case 'f':
-    move = FORWARD;
+    if (manualMode)  {
+      if (checkDistance()) {
+        eBot.setDirection(EBot::FORWARD);
+      } else {
+        eBot.setDirection();
+      }
+    }
     break;
     case 'b':
-    move = BACKWARD;
+    if (manualMode) eBot.setDirection(EBot::BACKWARD);
     break;
     case 'l':
-    move = TURNLEFT;
+    if (manualMode) eBot.setDirection(EBot::TURNLEFT);
     break;
     case 'r':
-    move = TURNRIGHT;
+    if (manualMode) eBot.setDirection(EBot::TURNRIGHT);
     break;
     case 'L':
-    move = ROTATELEFT;
+    if (manualMode) eBot.setDirection(EBot::ROTATELEFT);
     break;
     case 'R':
-    move = ROTATERIGHT;
+    if (manualMode) eBot.setDirection(EBot::ROTATERIGHT);
+    break;
+    case 'M':
+    manualMode = !manualMode;
     break;
   }
 }
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   eBot.begin();
-  eBot.stop();
+  eBot.setSpeed(speed);
 }
 
 void loop() {
   checkRemoteCommands();
-  drive();
-  eBot.setSpeed(10);
-  eBot.setDirection(EBot::FORWARD);
-/*  eBot.write(90);
-  distance = eBot.distance();
-
-  if (distance < minM && angle == 90) {
-    minM = distance;
-    move = STOP;
-  }
-  if (distance > DISTANCE && angle == 90) {
-    minM = DISTANCE;
-    move = FORWARD;
-  }
-
-  if (distance < min && angle < 90) {
-    min = distance;
-    move = TURNRIGHT;
-  }
-
-  if (distance < min && angle > 90) {
-    min = distance;
-    move = TURNLEFT;
-  }
-
-  Serial << "angle=" << angle << " min=" << min << " distance=" << distance << endl;
-  angle += angleDelta;
-  if (angle > angleStop || angle < angleStart) {
-    drive();
-    angleDelta = -angleDelta;
-    angle += angleDelta;
-    min = DISTANCE;
-    minM = DISTANCE;
-  }
-  delay(1000);
-  Serial << eBot.result(); */
 }
