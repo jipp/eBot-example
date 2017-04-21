@@ -63,5 +63,6 @@ void setup() {
 }
 
 void loop() {
+  eBot.setAngle(90);
   checkRemoteCommands();
 }
