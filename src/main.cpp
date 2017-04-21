@@ -18,11 +18,8 @@ bool checkDistance() {
   return true;
 }
 
-void checkRemoteCommands() {
-  char getstr;
-
-  getstr=Serial.read();
-  switch (getstr) {
+void checkCommands(char str) {
+  switch (str) {
     case 's':
     if (manualMode) eBot.setDirection();
     break;
@@ -30,8 +27,6 @@ void checkRemoteCommands() {
     if (manualMode)  {
       if (checkDistance()) {
         eBot.setDirection(EBot::FORWARD);
-      } else {
-        eBot.setDirection();
       }
     }
     break;
@@ -56,6 +51,20 @@ void checkRemoteCommands() {
   }
 }
 
+char getSerial() {
+  return Serial.read();
+}
+
+char getIR() {
+  return 'n';
+}
+
+void checkObstacle() {
+  if (!checkDistance()) {
+    eBot.setDirection();
+  }
+}
+
 void setup() {
   Serial.begin(115200);
   eBot.begin();
@@ -63,6 +72,7 @@ void setup() {
 }
 
 void loop() {
-  eBot.setAngle(90);
-  checkRemoteCommands();
+  checkCommands(getSerial());
+  // checkCommands(getIR());
+  checkObstacle();
 }
