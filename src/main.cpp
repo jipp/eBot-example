@@ -1,6 +1,7 @@
 #include "Arduino.h"
 #include <Streaming.h>
 #include <EBot.h>
+#include <Woke.h>
 
 #define DISTANCE  40
 
@@ -16,11 +17,17 @@ void stateChange() {
   digitalWrite(LED_BUILTIN, state);
 }
 
-bool checkDistance() {
-  if (eBot.getDistance() < DISTANCE) {
+bool checkDistance(unsigned long distance) {
+  if (eBot.getDistance() < distance) {
     return false;
   }
   return true;
+}
+
+bool checkObstacle(int angle, unsigned long distance) {
+  eBot.setAngle(angle);
+
+  return checkDistance(distance);
 }
 
 void checkCommands(char str) {
@@ -31,11 +38,7 @@ void checkCommands(char str) {
     break;
     case 'f':
     Serial << 'f' << endl;
-    if (manualMode)  {
-      if (checkDistance()) {
-        eBot.setDirection(EBot::FORWARD);
-      }
-    }
+    if (manualMode) eBot.setDirection(EBot::FORWARD);
     break;
     case 'b':
     Serial << 'b' << endl;
@@ -57,29 +60,27 @@ void checkCommands(char str) {
     Serial << 'R' << endl;
     if (manualMode) eBot.setDirection(EBot::ROTATERIGHT);
     break;
-    case 'c':
-    Serial << 'c' << endl;
-    stateChange();
-    break;
     case '-':
     Serial << '-' << endl;
-    if (manualMode) speed = eBot.setSpeed(--speed);
+    if (manualMode) {
+      eBot.setSpeed(--speed);
+      speed = eBot.getSpeed();
+    }
     break;
     case '+':
     Serial << '+' << endl;
-    speed += speedDelta;
-    if (manualMode) speed = eBot.setSpeed(--speed);
-    break;
+    if (manualMode) {
+      eBot.setSpeed(++speed);
+      speed = eBot.getSpeed();
+    }
     case 'M':
     Serial << 'M' << endl;
     manualMode = !manualMode;
     break;
-  }
-}
-
-void checkObstacle() {
-  if (!checkDistance()) {
-    eBot.setDirection();
+    case 'c':
+    Serial << 'c' << endl;
+    stateChange();
+    break;
   }
 }
 
@@ -91,5 +92,5 @@ void setup() {
 
 void loop() {
   checkCommands(Serial.read());
-  checkObstacle();
+  if (!checkObstacle(90, DISTANCE) && eBot.getDirection() == EBot::FORWARD) eBot.setDirection();
 }
