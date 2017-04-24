@@ -2,21 +2,22 @@
 #include <Streaming.h>
 #include <EBot.h>
 
-#define DISTANCE  40
+#define DISTANCE  50
 
 EBot eBot = EBot();
 unsigned long distance = 0;
 bool manualMode = true;
 int speed = 120;
 int speedDelta = 10;
-int angleStart = 45;
-int angleDelta = 45;
+int angleStart = 30;
+int angleDelta = 30;
 int angleEnd = 180 - angleStart;
 int angle = angleStart;
 unsigned long angleTimer = 0;
-unsigned long angleTimerInterval = 50;
+unsigned long angleTimerInterval = 60;
 unsigned long angleTimerStart = millis();
 volatile int state = LOW;
+bool obstacleDetected = false;
 
 void stateChange() {
   state = !state;
@@ -83,25 +84,43 @@ void setup() {
   eBot.begin();
   eBot.setSpeed(speed);
   angleStart = millis();
+  eBot.setDirection(EBot::FORWARD);
 }
 
 void loop() {
   if (millis() - angleTimerStart > angleTimerInterval) {
     angleTimerStart = millis();
-    Serial << millis() << " " << angle << " " << eBot.getDistance() << endl;
-    eBot.setAngle(angle);
     angle += angleDelta;
     if (angle <= angleStart || angle > angleEnd) {
       angleDelta *= -1;
       angle += angleDelta;
     }
   }
+  //angle = 45;
   checkCommands(Serial.read());
   if (angle == 90) {
-    if (!checkObstacle(angle, DISTANCE) && eBot.getDirection() == EBot::FORWARD) eBot.setDirection();
+    if (!obstacleDetected && !checkObstacle(angle, DISTANCE) && eBot.getDirection() == EBot::FORWARD) {
+      obstacleDetected = true;
+      eBot.setDirection(EBot::ROTATERIGHT);
+    } else if (obstacleDetected && checkObstacle(angle, DISTANCE) && eBot.getDirection() == EBot::ROTATERIGHT) {
+      obstacleDetected = false;
+      eBot.setDirection(EBot::FORWARD);
+    }
   } else if (angle < 90) {
-    if (!checkObstacle(angle, DISTANCE)) eBot.setDirection(EBot::TURNLEFT);
+    if (!obstacleDetected && !checkObstacle(angle, DISTANCE)) {
+      obstacleDetected = true;
+      eBot.setDirection(EBot::TURNLEFT);
+    } if (obstacleDetected && checkObstacle(angle, DISTANCE) && eBot.getDirection() == EBot::TURNLEFT) {
+      obstacleDetected = false;
+      eBot.setDirection(EBot::FORWARD);
+    }
   } else if (angle > 90) {
-    if (!checkObstacle(angle, DISTANCE)) eBot.setDirection(EBot::TURNRIGHT);
+    if (!obstacleDetected && !checkObstacle(angle, DISTANCE)) {
+      obstacleDetected = true;
+      eBot.setDirection(EBot::TURNRIGHT);
+    } if (obstacleDetected && checkObstacle(angle, DISTANCE) && eBot.getDirection() == EBot::TURNRIGHT) {
+      obstacleDetected = false;
+      eBot.setDirection(EBot::FORWARD);
+    }
   }
 }
