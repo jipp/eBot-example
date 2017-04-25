@@ -2,6 +2,7 @@
 
 #include "Arduino.h"
 #include <Streaming.h>
+#include <ArduinoJson.h>
 #include <EBot.h>
 
 #define DISTANCE  50
@@ -75,6 +76,7 @@ void checkCommands(char str) {
     break;
     case 'd':
     Serial << "mode " << manualModeSet << " Speed " << eBot.getSpeed() << " Direction " << eBot.getDirection() << " distance " << eBot.getDistance() << " angle " << angle << " obstacle " << checkNoObstacle(angle, DISTANCE) << endl;
+    break;
   }
 }
 
@@ -85,7 +87,7 @@ void manualMode(char str) {
     eBot.setDirection();
     break;
     case 'f':
-    eBot.setDirection(EBot::FORWARD);
+    if (checkNoObstacle(angle, DISTANCE)) eBot.setDirection(EBot::FORWARD);
     break;
     case 'b':
     eBot.setDirection(EBot::BACKWARD);
