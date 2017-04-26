@@ -20,6 +20,8 @@ unsigned long dataTimer = 0;
 const unsigned long dataTimerInterval = 1000;
 int state = LOW;
 bool obstacleDetected = false;
+unsigned long distanceL = DISTANCE;
+unsigned long distanceR = DISTANCE;
 DynamicJsonBuffer jsonBuffer;
 JsonObject& root = jsonBuffer.createObject();
 
@@ -32,6 +34,8 @@ void sendData() {
     root["angle"] = eBot.getAngle();
     root["obstacleDetected"] = obstacleDetected;
     root["state"] = state;
+    root["distanceL"] = distanceL;
+    root["distanceR"] = distanceR;
     root.prettyPrintTo(Serial);
     //root.printTo(Serial);
     Serial << "<eom>" << endl;
@@ -59,8 +63,10 @@ void changeAngle() {
     if (angle < angleStart || angle > angleEnd) {
       angleDelta = -angleDelta;
       angle += angleDelta;
+      distanceL = DISTANCE;
+      distanceR = DISTANCE;
     }
-//    eBot.setAngle();
+    //    eBot.setAngle();
     eBot.setAngle(angle);
   }
 }
@@ -116,12 +122,17 @@ void autonomousMode() {
   if (eBot.getAngle() == 90) {
     if (!obstacleDetected && !checkDistanceOK(DISTANCE) && eBot.getDirection() == EBot::FORWARD) {
       obstacleDetected = true;
-      eBot.setDirection(EBot::ROTATERIGHT);
+      if (distanceL < distanceR) {
+        eBot.setDirection(EBot::ROTATERIGHT);
+      } else {
+        eBot.setDirection(EBot::ROTATELEFT);
+      }
     } else if (obstacleDetected && checkDistanceOK(DISTANCE) && (eBot.getDirection() == EBot::ROTATELEFT || eBot.getDirection() == EBot::ROTATERIGHT)) {
       obstacleDetected = false;
       eBot.setDirection(EBot::FORWARD);
     }
   } else if (eBot.getAngle() < 90) {
+    distanceR = min(distanceR, eBot.getDistance());
     if (!obstacleDetected && !checkDistanceOK(DISTANCE)) {
       obstacleDetected = true;
       eBot.setDirection(EBot::TURNLEFT);
@@ -130,6 +141,7 @@ void autonomousMode() {
       eBot.setDirection(EBot::FORWARD);
     }
   } else if (eBot.getAngle() > 90) {
+    distanceL = min(distanceL, eBot.getDistance());
     if (!obstacleDetected && !checkDistanceOK(DISTANCE)) {
       obstacleDetected = true;
       eBot.setDirection(EBot::TURNRIGHT);
