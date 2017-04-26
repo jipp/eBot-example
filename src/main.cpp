@@ -9,18 +9,15 @@
 
 EBot eBot = EBot();
 char str;
-bool manualMode = false;
+bool isManualMode = false;
 int speed = 120;
-int speedRotate = 130;
-int speedDelta = 10;
-int angleStart = 30;
+const int speedDelta = 10;
+const int angleStart = 30;
 int angleDelta = 30;
-int angleEnd = 180 - angleStart;
-int angle = angleStart;
+const int angleEnd = 180 - angleStart;
 unsigned long angleTimer = 0;
-unsigned long angleTimerInterval = 60;
 unsigned long dataTimer = 0;
-unsigned long dataTimerInterval = 1000;
+const unsigned long dataTimerInterval = 1000;
 int state = LOW;
 bool obstacleDetected = false;
 DynamicJsonBuffer jsonBuffer;
@@ -29,7 +26,7 @@ JsonObject& root = jsonBuffer.createObject();
 void sendData() {
   if (millis() - dataTimer > dataTimerInterval) {
     dataTimer = millis();
-    root["manualMode"] = manualMode;
+    root["isManualMode"] = isManualMode;
     root["direction"] = eBot.getDirection();
     root["angle"] = eBot.getAngle();
     root["obstacleDetected"] = obstacleDetected;
@@ -51,7 +48,9 @@ bool checkDistanceOK(unsigned long distance) {
   return true;
 }
 
-int changeAngle(int angle) {
+void changeAngle() {
+  int angle = eBot.getAngle();
+
   if (millis() - angleTimer > angleTimerInterval) {
     angleTimer = millis();
     angle += angleDelta;
@@ -59,10 +58,9 @@ int changeAngle(int angle) {
       angleDelta = -angleDelta;
       angle += angleDelta;
     }
-    eBot.setAngle();
-//    eBot.setAngle(angle);
+//    eBot.setAngle();
+    eBot.setAngle(angle);
   }
-  return angle;
 }
 
 void checkCommands(char str) {
@@ -78,9 +76,8 @@ void checkCommands(char str) {
     speed = eBot.getSpeed();
     break;
     case 'M':
-    manualMode = !manualMode;
-    angle = 90;
-    eBot.setAngle(angle);
+    isManualMode = !isManualMode;
+    eBot.setAngle(90);
     eBot.setDirection(EBot::FORWARD);
     break;
     case 'c':
@@ -89,7 +86,7 @@ void checkCommands(char str) {
   }
 }
 
-void switchManualMode(char str) {
+void manualMode(char str) {
   if (!checkDistanceOK(DISTANCE) && eBot.getDirection() == EBot::FORWARD) eBot.setDirection();
   switch(str) {
     case 's':
@@ -116,8 +113,8 @@ void switchManualMode(char str) {
   }
 }
 
-void autonomousMode(int angle) {
-  if (angle == 90) {
+void autonomousMode() {
+  if (eBot.getAngle() == 90) {
     if (!obstacleDetected && !checkDistanceOK(DISTANCE) && eBot.getDirection() == EBot::FORWARD) {
       obstacleDetected = true;
       eBot.setSpeed(speed*1.5);
@@ -127,7 +124,7 @@ void autonomousMode(int angle) {
       eBot.setSpeed(speed);
       eBot.setDirection(EBot::FORWARD);
     }
-  } else if (angle < 90) {
+  } else if (eBot.getAngle() < 90) {
     if (!obstacleDetected && !checkDistanceOK(DISTANCE)) {
       obstacleDetected = true;
       eBot.setDirection(EBot::TURNLEFT);
@@ -135,7 +132,7 @@ void autonomousMode(int angle) {
       obstacleDetected = false;
       eBot.setDirection(EBot::FORWARD);
     }
-  } else if (angle > 90) {
+  } else if (eBot.getAngle() > 90) {
     if (!obstacleDetected && !checkDistanceOK(DISTANCE)) {
       obstacleDetected = true;
       eBot.setDirection(EBot::TURNRIGHT);
@@ -157,10 +154,10 @@ void loop() {
   str = Serial.read();
   sendData();
   checkCommands(str);
-  if (manualMode) {
-    switchManualMode(str);
+  if (isManualMode) {
+    manualMode(str);
   } else {
-    angle = changeAngle(angle);
-    autonomousMode(angle);
+    changeAngle();
+    autonomousMode();
   }
 }
