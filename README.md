@@ -1,12 +1,16 @@
+[![Build Status](https://travis-ci.org/jipp/eBot-example.svg?branch=master)](https://travis-ci.org/jipp/eBot-example)
+
 # eBot example
 Example program for using the eBot library written with PlatformIO, to be used as well with other boards.
 
 ## IDE
-* PlatformIO IDE: used for developement
+* PlatformIO IDE: used for development
 * Arduino IDE: copy content of main.cpp into Arduino IDE
 
 ## Needed Libraries
 * [eBot.h](https://github.com/jipp/eBot)
+* [ 64  ] ArduinoJson
+* [ 560 ] Streaming
 
 ## The following features are used
 - [x] bluetooth remote control
