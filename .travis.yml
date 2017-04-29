@@ -8,10 +8,11 @@ cache:
         - "~/.platformio"
 
 env:
-     - PLATFORMIO_CI_SRC=eBot-example/src/main.cpp
+     - PLATFORMIO_CI_SRC=src/main.cpp
 
 install:
     - pip install -U platformio
+    - platformio lib -g install 560
     - wget https://github.com/jipp/eBot/archive/master.zip -O /tmp/eBot.zip
     - unzip /tmp/eBot.zip -d /tmp/
 
