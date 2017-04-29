@@ -20,18 +20,18 @@ Example program for using the eBot library written with PlatformIO, to be used a
 ## Info
 * for obstacle avoidance Ultrasonic is used. This is only working for flat surfaces.
 * the following commands can be used in any mode:
- * '-' - decreases speed
- * '+' - increase speed
- * 'M' - switch between manual and autonomous mode
- * 'c' - switch LED state
+  * '-' - decreases speed
+  * '+' - increase speed
+  * 'M' - switch between manual and autonomous mode
+  * 'c' - switch LED state
 * the following commands can be used - manual mode:
- * 's' - stop
- * 'f' - forward
- * 'b' - backward
- * 'l' - turn left
- * 'r' - turn right
- * 'L' - rotate leftt
- * 'R' - rotate right
+  * 's' - stop
+  * 'f' - forward
+  * 'b' - backward
+  * 'l' - turn left
+  * 'r' - turn right
+  * 'L' - rotate leftt
+  * 'R' - rotate right
 
 ## Tested hardware
 ### Boards
