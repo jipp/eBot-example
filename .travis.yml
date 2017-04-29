@@ -12,7 +12,7 @@ env:
 
 install:
     - pip install -U platformio
-    - platformio lib -g install 560
+    - platformio lib -g install 64 560
     - wget https://github.com/jipp/eBot/archive/master.zip -O /tmp/eBot.zip
     - unzip /tmp/eBot.zip -d /tmp/
 
