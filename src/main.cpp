@@ -153,7 +153,7 @@ void autonomousMode() {
 }
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   eBot.begin();
   eBot.setDirection(EBot::FORWARD);
 }
