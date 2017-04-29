@@ -6,7 +6,7 @@ Example program for using the eBot library written with PlatformIO, to be used a
 * Arduino IDE: copy content of main.cpp into Arduino IDE
 
 ## Needed Libraries
-* eBot.h
+* [eBot.h](https://github.com/jipp/eBot)
 
 ## The following features are used
 - [x] bluetooth remote control
