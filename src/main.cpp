@@ -1,5 +1,3 @@
-// obstacle in front ->  check and decide which direction to turn
-
 #include "Arduino.h"
 #include <Streaming.h>
 #include <ArduinoJson.h>
@@ -66,7 +64,6 @@ void changeAngle() {
       distanceL = DISTANCE;
       distanceR = DISTANCE;
     }
-    //    eBot.setAngle();
     eBot.setAngle(angle);
   }
 }
