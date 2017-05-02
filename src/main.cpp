@@ -3,23 +3,24 @@
 #include <ArduinoJson.h>
 #include <EBot.h>
 
-#define DISTANCE  50
+const int speedDelta = 5;
+const int angleStart = 30;
+const unsigned long distanceMax = 50;
+const unsigned long distanceMin = 20;
+const unsigned long angleTimerInterval = 60;
+const unsigned long dataTimerInterval = 1000;
 
 EBot eBot = EBot();
 char str;
 bool isManualMode = false;
-const int speedDelta = 5;
-const int angleStart = 30;
 int angleDelta = 30;
 const int angleEnd = 180 - angleStart;
 unsigned long angleTimer = 0;
-const unsigned long angleTimerInterval = 60;
 unsigned long dataTimer = 0;
-const unsigned long dataTimerInterval = 1000;
 int state = LOW;
 bool obstacleDetected = false;
-unsigned long distanceL = DISTANCE;
-unsigned long distanceR = DISTANCE;
+unsigned long distanceL = distanceMax;
+unsigned long distanceR = distanceMax;
 DynamicJsonBuffer jsonBuffer;
 JsonObject& root = jsonBuffer.createObject();
 
@@ -61,8 +62,8 @@ void changeAngle() {
     if (angle < angleStart || angle > angleEnd) {
       angleDelta = -angleDelta;
       angle += angleDelta;
-      distanceL = DISTANCE;
-      distanceR = DISTANCE;
+      distanceL = distanceMax;
+      distanceR = distanceMax;
     }
     eBot.setAngle(angle);
   }
@@ -88,13 +89,13 @@ void checkCommands(char str) {
 }
 
 void manualMode(char str) {
-  if (!checkDistanceOK(DISTANCE) && eBot.getDirection() == EBot::FORWARD) eBot.setDirection();
+  if (!checkDistanceOK(distanceMax) && eBot.getDirection() == EBot::FORWARD) eBot.setDirection();
   switch(str) {
     case 's':
     eBot.setDirection();
     break;
     case 'f':
-    if (checkDistanceOK(DISTANCE)) eBot.setDirection(EBot::FORWARD);
+    if (checkDistanceOK(distanceMax)) eBot.setDirection(EBot::FORWARD);
     break;
     case 'b':
     eBot.setDirection(EBot::BACKWARD);
@@ -117,32 +118,35 @@ void manualMode(char str) {
 void autonomousMode() {
   changeAngle();
   if (eBot.getAngle() == 90) {
-    if (!obstacleDetected && !checkDistanceOK(DISTANCE) && eBot.getDirection() == EBot::FORWARD) {
+    if (!checkDistanceOK(distanceMin)) {
+      obstacleDetected = true;
+      eBot.setDirection(EBot::BACKWARD);
+    } else if (!obstacleDetected && !checkDistanceOK(distanceMax) && eBot.getDirection() == EBot::FORWARD) {
       obstacleDetected = true;
       if (distanceL < distanceR) {
         eBot.setDirection(EBot::ROTATERIGHT);
       } else {
         eBot.setDirection(EBot::ROTATELEFT);
       }
-    } else if (obstacleDetected && checkDistanceOK(DISTANCE) && (eBot.getDirection() == EBot::ROTATELEFT || eBot.getDirection() == EBot::ROTATERIGHT)) {
+    } else if (obstacleDetected && checkDistanceOK(distanceMax) && (eBot.getDirection() == EBot::ROTATELEFT || eBot.getDirection() == EBot::ROTATERIGHT || eBot.getDirection() == EBot::BACKWARD)) {
       obstacleDetected = false;
       eBot.setDirection(EBot::FORWARD);
     }
   } else if (eBot.getAngle() < 90) {
     distanceR = min(distanceR, eBot.getDistance());
-    if (!obstacleDetected && !checkDistanceOK(DISTANCE)) {
+    if (!obstacleDetected && !checkDistanceOK(distanceMax)) {
       obstacleDetected = true;
       eBot.setDirection(EBot::TURNLEFT);
-    } if (obstacleDetected && checkDistanceOK(DISTANCE) && eBot.getDirection() == EBot::TURNLEFT) {
+    } if (obstacleDetected && checkDistanceOK(distanceMax) && eBot.getDirection() == EBot::TURNLEFT) {
       obstacleDetected = false;
       eBot.setDirection(EBot::FORWARD);
     }
   } else if (eBot.getAngle() > 90) {
     distanceL = min(distanceL, eBot.getDistance());
-    if (!obstacleDetected && !checkDistanceOK(DISTANCE)) {
+    if (!obstacleDetected && !checkDistanceOK(distanceMax)) {
       obstacleDetected = true;
       eBot.setDirection(EBot::TURNRIGHT);
-    } if (obstacleDetected && checkDistanceOK(DISTANCE) && eBot.getDirection() == EBot::TURNRIGHT) {
+    } if (obstacleDetected && checkDistanceOK(distanceMax) && eBot.getDirection() == EBot::TURNRIGHT) {
       obstacleDetected = false;
       eBot.setDirection(EBot::FORWARD);
     }
