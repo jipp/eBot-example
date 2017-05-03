@@ -17,4 +17,5 @@ install:
     - unzip /tmp/eBot.zip -d /tmp/
 
 script:
-    - platformio ci --lib="/tmp/eBot-master" --board=uno
+#    - platformio ci --lib="/tmp/eBot-master" --board=uno
+    - platformio ci --lib="/tmp/eBot-master" --project-conf=platformio.ini
